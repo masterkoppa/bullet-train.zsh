@@ -540,7 +540,7 @@ prompt_status() {
 }
 
 prompt_battery() {
-  if command -v pmset -g batt > /dev/null 2>&1; then
+  if command -v pmset > /dev/null 2>&1; then
     local pmset_output
     pmset_output=$(pmset -g batt | grep --colour=never InternalBattery-0)
     if [[ "$pmset_output" ]]; then
