@@ -274,10 +274,13 @@ if [ ! -n "${BULLETTRAIN_BATT_PREFIX+1}" ]; then
   BULLETTRAIN_BATT_PREFIX="🔋 "
 fi
 if [ ! -n "${BULLETTRAIN_BATT_CHARGING+1}" ]; then
-  BULLETTRAIN_BATT_CHARGING="⬆ "
+  BULLETTRAIN_BATT_CHARGING="⬆"
 fi
 if [ ! -n "${BULLETTRAIN_BATT_DISCHARGING+1}" ]; then
-  BULLETTRAIN_BATT_DISCHARGING="⬇ "
+  BULLETTRAIN_BATT_DISCHARGING="⬇"
+fi
+if [ ! -n "${BULLETTRAIN_BATT_SHOW_ESTIMATE+1}" ]; then
+  BULLETTRAIN_BATT_SHOW_ESTIMATE=true
 fi
 
 # ------------------------------------------------------------------------------
@@ -560,7 +563,11 @@ prompt_battery() {
         battery_status=""
       fi
 
-      prompt_segment $BULLETTRAIN_BATT_BG $BULLETTRAIN_BATT_FG "$BULLETTRAIN_BATT_PREFIX $battery_status $battery_percent%% $battery_estimate"
+      if [[ $BULLETTRAIN_BATT_SHOW_ESTIMATE != true ]]; then
+        battery_estimate=""
+      fi
+
+      prompt_segment $BULLETTRAIN_BATT_BG $BULLETTRAIN_BATT_FG "$BULLETTRAIN_BATT_PREFIX $battery_status$battery_percent%% $battery_estimate"
     fi
   elif command -v upower > /dev/null 2>&1; then
     local upower_output
