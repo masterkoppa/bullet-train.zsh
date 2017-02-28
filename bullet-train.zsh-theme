@@ -271,7 +271,13 @@ if [ ! -n "${BULLETTRAIN_BATT_FG+1}" ]; then
   BULLETTRAIN_BATT_FG=white
 fi
 if [ ! -n "${BULLETTRAIN_BATT_PREFIX+1}" ]; then
-  BULLETTRAIN_BATT_PREFIX="🔋"
+  BULLETTRAIN_BATT_PREFIX="🔋 "
+fi
+if [ ! -n "${BULLETTRAIN_BATT_CHARGING+1}" ]; then
+  BULLETTRAIN_BATT_CHARGING="⬆ "
+fi
+if [ ! -n "${BULLETTRAIN_BATT_DISCHARGING+1}" ]; then
+  BULLETTRAIN_BATT_DISCHARGING="⬇ "
 fi
 
 # ------------------------------------------------------------------------------
@@ -542,11 +548,19 @@ prompt_battery() {
       local battery_estimate
       local battery_status
 
-      battery_percent=$(echo $pmset_output | grep --colour=never -oE '[[:digit:]]*.[[:digit:]]*%' | grep --colour=never -oE '[[:digit:]]*')
+      battery_percent=$(echo $pmset_output | grep --colour=never -oE '[[:digit:]]*.[[:digit:]]*%|[[:digit:]]*%' | grep --colour=never -oE '[[:digit:]]+')
       battery_estimate=$(echo $pmset_output | grep --colour=never -oE '[[:digit:]]+:[[:digit:]]+')
-      battery_status=$(echo $pmset_output | grep --colour=never -oE 'charging|discharging|AC attached')
+      battery_status=$(echo $pmset_output | grep --colour=never -oE 'charging|discharging|AC attached|charged')
 
-      prompt_segment $BULLETTRAIN_BATT_BG $BULLETTRAIN_BATT_FG $BULLETTRAIN_BATT_PREFIX"$battery_percent%% $battery_estimate $battery_status"
+      if [[ $battery_status == 'charging' ]]; then
+        battery_status="$BULLETTRAIN_BATT_CHARGING"
+      elif [[ $battery_status == 'discharging' ]]; then
+        battery_status="$BULLETTRAIN_BATT_DISCHARGING"
+      else
+        battery_status=""
+      fi
+
+      prompt_segment $BULLETTRAIN_BATT_BG $BULLETTRAIN_BATT_FG "$BULLETTRAIN_BATT_PREFIX $battery_status $battery_percent%% $battery_estimate"
     fi
   elif command -v upower > /dev/null 2>&1; then
     local upower_output
@@ -560,7 +574,7 @@ prompt_battery() {
       battery_percent=$(echo $upower_output | grep --colour=never -oE '[[:digit:]]*.[[:digit:]]*%')
       battery_estimate=$(echo $upower_output | grep 'to\ full' | grep -oE '\S*\s\S*$' | grep --colour=never -oE '\S*\s\S')
       battery_status=$(echo $upower_output | grep --colour=never 'state:' | grep --colour=never -oE '\S*$')
-      
+
       prompt_segment $BULLETTRAIN_BATT_BG $BULLETTRAIN_BATT_FG $BULLETTRAIN_BATT_PREFIX"$battery_percent%% $battery_estimate $battery_status"
     fi
   fi
